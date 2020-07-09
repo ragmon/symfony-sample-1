@@ -102,4 +102,19 @@ class LuckyController extends AbstractController
             'hello from homepage without caching'
         );
     }
+
+    /**
+     * @Route(
+     *     "/http_route",
+     *     name="http_route",
+     *     schemes={"http"}
+     * )
+     * @return Response
+     */
+    public function httpRoute()
+    {
+        return new Response(
+            'hello from http response'
+        );
+    }
 }
