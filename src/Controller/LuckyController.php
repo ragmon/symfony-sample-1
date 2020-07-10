@@ -2,8 +2,11 @@
 
 namespace App\Controller;
 
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -116,5 +119,118 @@ class LuckyController extends AbstractController
         return new Response(
             'hello from http response'
         );
+    }
+
+    /**
+     * @Route(
+     *     "/number/{max}",
+     *     name="number",
+     *     requirements={
+     *          "max": "\d+"
+     *     }
+     * )
+     * @param int $max
+     * @param LoggerInterface $logger
+     * @return Response
+     */
+    public function number(int $max, LoggerInterface $logger)
+    {
+        $number = mt_rand(0, $max);
+        $baseUrl = $this->generateUrl('blog_homepage');
+
+        $logger->info("lucky number: $number");
+
+        return new Response(
+            '<html><body>Lucky number: ' . $number . '</body><a href="' . $baseUrl . '">BaseURL</a></html>'
+        );
+    }
+
+    /**
+     * @Route(
+     *     "/redirect",
+     *     name="redirect"
+     * )
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     */
+    public function myRedirect()
+    {
+        return $this->redirectToRoute('blog_homepage');
+    }
+
+    /**
+     * @Route(
+     *     "/json",
+     *     name="json"
+     * )
+     * @return \Symfony\Component\HttpFoundation\JsonResponse
+     */
+    public function renderJson()
+    {
+        return $this->json([
+            'value' => 'hello world',
+        ]);
+    }
+
+    /**
+     * @Route(
+     *     "/template",
+     *     name="template"
+     * )
+     * @return Response
+     */
+    public function renderTemplate()
+    {
+        return $this->render('lucky/index.html.twig', [
+            'controller_name' => 'my controller',
+        ]);
+    }
+
+    /**
+     * @Route(
+     *     "/request",
+     *     name="request"
+     * )
+     * @param Request $request
+     * @return Response
+     */
+    public function myRequest(Request $request)
+    {
+        $count = $request->query->count();
+
+        return new Response(
+            '<html><body>Query params count: ' . $count . '</body></html>'
+        );
+    }
+
+    /**
+     * @Route(
+     *     "/session",
+     *     name="session"
+     * )
+     * @param SessionInterface $session
+     * @return Response
+     */
+    public function mySession(SessionInterface $session)
+    {
+        $foobar = $session->get('foo', 'default value');
+
+        return new Response(
+            "<html><body>$foobar</body></html>"
+        );
+    }
+
+    /**
+     * @Route(
+     *     "/session_redirect",
+     *     name="session_redirect"
+     * )
+     * @param SessionInterface $session
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     */
+    public function mySessionRedirect(SessionInterface $session)
+    {
+        $session->set('foo', 'value from mySessionRedirect');
+
+        return $this->redirectToRoute('blog_session');
     }
 }
